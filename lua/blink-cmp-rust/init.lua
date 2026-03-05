@@ -5,7 +5,7 @@ local M = {}
 -- rustaceanvim uses "rust-analyzer", nvim-lspconfig uses "rust_analyzer"
 local RA_NAMES = { ["rust-analyzer"] = true, ["rust_analyzer"] = true }
 
----@param item table
+---@param item blink.cmp.CompletionItem
 ---@return boolean
 local function is_rust_analyzer(item)
 	-- nil client_name means blink.cmp didn't stamp it (older versions); classify anyway
@@ -70,10 +70,10 @@ function M.is_enabled()
 	return enabled
 end
 
----@param _ctx table
----@param items table[]
----@return table[]
-function M.transform_items(_ctx, items)
+---@param _ctx blink.cmp.Context
+---@param items blink.cmp.CompletionItem[]
+---@return blink.cmp.CompletionItem[]
+function M.transform_items(_ctx, items) ---@diagnostic disable-line: unused-local
 	if not enabled or vim.bo.filetype ~= "rust" then
 		return items
 	end
@@ -82,6 +82,7 @@ function M.transform_items(_ctx, items)
 	if not has_filters then
 		for _, item in ipairs(items) do
 			if is_rust_analyzer(item) then
+				---@cast item blink-cmp-rust.CompletionItem
 				item._rust = classify.item(item, extra_traits)
 			end
 		end
@@ -93,6 +94,7 @@ function M.transform_items(_ctx, items)
 		if not is_rust_analyzer(item) then
 			filtered[#filtered + 1] = item
 		elseif not M._should_filter(item) then
+			---@cast item blink-cmp-rust.CompletionItem
 			item._rust = classify.item(item, extra_traits)
 			filtered[#filtered + 1] = item
 		end
@@ -100,14 +102,14 @@ function M.transform_items(_ctx, items)
 	return filtered
 end
 
----@param item table
+---@param item blink.cmp.CompletionItem
 ---@return boolean
 ---@private
 function M._should_filter(item)
-	if not (item.data and item.data.imports) then
+	if not (item.data and item.data.imports) then ---@diagnostic disable-line: undefined-field
 		return false
 	end
-	for _, entry in ipairs(item.data.imports) do
+	for _, entry in ipairs(item.data.imports) do ---@diagnostic disable-line: undefined-field
 		if entry.full_import_path then
 			for _, prefix in ipairs(config.filter_imports) do
 				if vim.startswith(entry.full_import_path, prefix) then
@@ -119,8 +121,8 @@ function M._should_filter(item)
 	return false
 end
 
----@param a table
----@param b table
+---@param a blink-cmp-rust.CompletionItem
+---@param b blink-cmp-rust.CompletionItem
 ---@return boolean|nil
 function M.compare(a, b)
 	if not enabled then

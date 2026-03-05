@@ -1,7 +1,13 @@
 {
   "$schema": "https://raw.githubusercontent.com/LuaLS/vscode-lua/master/setting/schema.json",
   "workspace": {
-    "library": ["lua"]
+    "library": [
+      "lua",
+      "~/.local/share/nvim/lazy/blink.cmp/lua",
+      "~/.local/share/nvim/site/pack/packer/start/blink.cmp/lua",
+      "~/.local/share/nvim/site/pack/packer/opt/blink.cmp/lua",
+      "~/.local/share/nvim/site/pack/deps/start/blink.cmp/lua"
+    ]
   },
   "diagnostics": {
     "globals": ["describe", "it", "assert", "before_each", "after_each", "setup", "teardown", "pending", "insulate", "spy", "stub", "mock"]

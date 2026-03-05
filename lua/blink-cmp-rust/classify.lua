@@ -80,17 +80,9 @@ local KEYWORD_KIND = 14
 ---@field is_keyword boolean
 ---@field is_text boolean
 
----@class blink-cmp-rust.CompareConfig
----@field inscope_first boolean?
----@field deprioritize_underscore boolean?
----@field fields_first boolean?
----@field inherent_first boolean?
----@field deprioritize_postfix boolean?
----@field deprioritize_deref boolean?
----@field deprioritize_borrow boolean?
----@field deprioritize_common_traits boolean?
----@field deprioritize_text boolean?
----@field deprioritize_keywords boolean?
+---@class blink-cmp-rust.CompletionItem : blink.cmp.CompletionItem
+---@field _rust blink-cmp-rust.Classification?
+---@field data { imports: { full_import_path: string? }[]? }?
 
 ---@param item blink.cmp.CompletionItem
 ---@param extra_traits table<string, boolean>?
@@ -133,9 +125,9 @@ end
 -- so the first differing flag always matches the intended tier boundary.
 -- blink.cmp fuzzy.sorts contract: return true if a should rank above b,
 -- false if below, nil to express no opinion and defer to the next sort.
----@param a blink.cmp.CompletionItem
----@param b blink.cmp.CompletionItem
----@param cfg blink-cmp-rust.CompareConfig
+---@param a blink-cmp-rust.CompletionItem
+---@param b blink-cmp-rust.CompletionItem
+---@param cfg blink-cmp-rust.Config
 ---@return boolean|nil
 function M.compare(a, b, cfg)
 	if not a._rust or not b._rust then
