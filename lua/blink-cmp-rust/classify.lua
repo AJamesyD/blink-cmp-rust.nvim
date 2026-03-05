@@ -1,3 +1,18 @@
+-- Classification and comparison for Rust completion items.
+--
+-- Two things to keep in mind when changing this file:
+--
+-- Lua's table.sort is unstable. Returning nil from compare for two items
+-- doesn't preserve their original order — it reshuffles them. If RA already
+-- gets something right (e.g. fields above methods via sortText), encode it
+-- explicitly in the compare chain. The fields_first regression came from
+-- assuming nil-fallthrough would preserve RA's ordering. It doesn't.
+--
+-- False positives are worse than false negatives. Promoting the wrong item
+-- is more disruptive than failing to demote a noisy one. Use exact trait
+-- name matches (== "Deref") not substrings, require the leading space in
+-- the trait pattern, and check data.imports structure not just presence.
+
 local M = {}
 
 -- Matches rust-analyzer's "(as TraitName)" format
