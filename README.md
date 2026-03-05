@@ -183,6 +183,8 @@ vim.keymap.set("n", "<leader>ur", function()
 end, { desc = "Toggle Rust completion sorting" })
 ```
 
+To keep this binding out of non-Rust buffers, you can put it in `after/ftplugin/rust.lua` instead of your global keymaps.
+
 <details>
 <summary>Advanced: snacks.nvim toggle integration</summary>
 
