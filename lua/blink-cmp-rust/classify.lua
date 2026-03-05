@@ -102,7 +102,7 @@ function M.item(item, extra_traits)
 	local is_inherent = trait_name == nil and not is_postfix
 	local needs_import = item.data and item.data.imports and #item.data.imports > 0
 	local is_field = item.kind == FIELD_KIND or item.kind == ENUM_MEMBER_KIND
-	local is_underscore = item.label and item.label:sub(1, 1) == "_" or false
+	local is_underscore = (item.label and item.label:sub(1, 1) == "_") or false
 
 	local is_common_trait = false
 	if trait_name then
@@ -116,14 +116,19 @@ function M.item(item, extra_traits)
 		trait_name = trait_name,
 		is_postfix = is_postfix,
 		is_common_trait = is_common_trait,
-		is_deref = trait_name and DEREF_SET[trait_name] or false,
-		is_borrow = trait_name and BORROW_SET[trait_name] or false,
+		is_deref = (trait_name and DEREF_SET[trait_name]) or false,
+		is_borrow = (trait_name and BORROW_SET[trait_name]) or false,
 		is_underscore = is_underscore,
 		is_keyword = item.kind == KEYWORD_KIND,
 		is_text = item.kind == TEXT_KIND,
 	}
 end
 
+-- NOTE: The check order below differs from the tier numbering in README
+-- ("How it works") but produces the same result. The flags are mutually
+-- exclusive in practice (a Deref method can't also be a common trait, a
+-- postfix can't carry a trait name), so the first differing flag always
+-- matches the intended tier boundary.
 ---@param a table
 ---@param b table
 ---@param cfg blink-cmp-rust.CompareConfig
