@@ -87,6 +87,8 @@ end
 ---@param b table
 ---@param cfg blink-cmp-rust.CompareConfig
 ---@return boolean|nil
+-- NOTE: Check order differs from the README priority list but is functionally
+-- equivalent because the categories are mutually exclusive in practice.
 function M.compare(a, b, cfg)
 	if not a._rust or not b._rust then
 		return nil

@@ -8,5 +8,7 @@
     "lines_above": 1
   },
   // first-line-heading
-  "MD041": false
+  "MD041": false,
+  // inline HTML (needed for <details> folds)
+  "MD033": false
 }

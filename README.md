@@ -26,7 +26,47 @@ Every feature can be toggled independently. The plugin only activates in Rust fi
 
 ## Installation
 
-Add as a dependency to your blink.cmp spec. The integration composes with existing config. If you remove this plugin, completions still work normally.
+Add as a dependency to your blink.cmp spec:
+
+```lua
+{
+  "saghen/blink.cmp",
+  dependencies = {
+    { "AJamesyD/blink-cmp-rust.nvim", opts = {} },
+  },
+  opts = function(_, opts)
+    local ok, rust_cmp = pcall(require, "blink-cmp-rust")
+    if not ok then return opts end
+
+    opts.sources = vim.tbl_deep_extend("force", opts.sources or {}, {
+      providers = {
+        lsp = {
+          transform_items = function(ctx, items)
+            return rust_cmp.transform_items(ctx, items)
+          end,
+        },
+      },
+    })
+
+    opts.fuzzy = vim.tbl_deep_extend("force", opts.fuzzy or {}, {
+      sorts = function()
+        if vim.bo.filetype == "rust" then
+          return vim.list_extend({ rust_cmp.compare }, { "score", "sort_text" })
+        end
+        return { "score", "sort_text" }
+      end,
+    })
+
+    return opts
+  end,
+}
+```
+
+<details>
+<summary>Advanced: chaining with existing plugins and custom sorts</summary>
+
+If you have other plugins that set `transform_items` or a custom `fuzzy.sorts`, use this
+expanded snippet to compose with them instead of overwriting:
 
 ```lua
 {
@@ -76,6 +116,8 @@ Add as a dependency to your blink.cmp spec. The integration composes with existi
   end,
 }
 ```
+
+</details>
 
 ## Configuration
 
@@ -139,7 +181,7 @@ then sorted by this priority (highest to lowest):
 
 1. **In-scope**: items already imported
 2. **Inherent**: methods defined directly on the type (`impl MyStruct`)
-3. **Non-common trait**: trait methods not in the common/deref/borrow lists
+3. **Non-common trait**: trait methods not in the common/deref/borrow lists (implicit: anything not deprioritized)
 4. **Deref-forwarded**: methods available through `Deref`/`DerefMut` coercion
 5. **Borrow-forwarded**: methods from `Borrow`/`BorrowMut`
 6. **Common trait**: `Clone`, `Copy`, `Default`, `From`, `Into`, etc.
@@ -172,7 +214,9 @@ If items have a `_rust` field in the output, the plugin is classifying them corr
 
 ## Credits
 
-Sorting logic ported from [nvim-cmp-lsp-rs](https://github.com/zjp-CN/nvim-cmp-lsp-rs) and [nvim-cmp-rust](https://github.com/ryo33/nvim-cmp-rust).
+Thanks to [zjp-CN](https://github.com/zjp-CN) for [nvim-cmp-lsp-rs](https://github.com/zjp-CN/nvim-cmp-lsp-rs)
+and [ryo33](https://github.com/ryo33) for [nvim-cmp-rust](https://github.com/ryo33/nvim-cmp-rust),
+which inspired this plugin.
 
 ## License
 
