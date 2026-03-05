@@ -221,8 +221,7 @@ then sorted by this priority (highest to lowest):
 
 Within each tier, blink.cmp's normal fuzzy scoring applies.
 
-<details>
-<summary>Troubleshooting</summary>
+## Troubleshooting
 
 ### Completions look the same after installing
 
@@ -240,8 +239,6 @@ vim.fn.writefile({ vim.inspect(items[1]) }, "/tmp/blink-rust-diag.log", "a")
 ```
 
 If items have a `_rust` field in the output, the plugin is classifying them correctly.
-
-</details>
 
 ## Credits
 
