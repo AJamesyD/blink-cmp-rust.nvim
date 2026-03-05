@@ -3,24 +3,26 @@ local classify = require("blink-cmp-rust.classify")
 local M = {}
 
 ---@class blink-cmp-rust.Config
----@field inherent_first boolean?
 ---@field inscope_first boolean?
+---@field deprioritize_underscore boolean?
+---@field fields_first boolean?
+---@field inherent_first boolean?
 ---@field deprioritize_postfix boolean?
----@field deprioritize_common_traits boolean?
 ---@field deprioritize_deref boolean?
 ---@field deprioritize_borrow boolean?
----@field deprioritize_underscore boolean?
+---@field deprioritize_common_traits boolean?
 ---@field extra_common_traits string[]?
 ---@field filter_imports string[]?
 
 local DEFAULT_CONFIG = {
-	inherent_first = true,
 	inscope_first = true,
+	deprioritize_underscore = true,
+	fields_first = true,
+	inherent_first = true,
 	deprioritize_postfix = true,
-	deprioritize_common_traits = true,
 	deprioritize_deref = true,
 	deprioritize_borrow = true,
-	deprioritize_underscore = true,
+	deprioritize_common_traits = true,
 	extra_common_traits = {},
 	filter_imports = {},
 }

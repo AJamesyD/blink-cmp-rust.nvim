@@ -4,13 +4,14 @@ local classify = require("blink-cmp-rust.classify")
 
 -- NOTE: must stay in sync with DEFAULT_CONFIG in init.lua
 local DEFAULT_CFG = {
-	inherent_first = true,
 	inscope_first = true,
+	deprioritize_underscore = true,
+	fields_first = true,
+	inherent_first = true,
 	deprioritize_postfix = true,
-	deprioritize_common_traits = true,
 	deprioritize_deref = true,
 	deprioritize_borrow = true,
-	deprioritize_underscore = true,
+	deprioritize_common_traits = true,
 }
 
 -- Helper to create mock LSP completion items
@@ -50,6 +51,14 @@ describe("classify.item", function()
 		assert.is_false(result.is_inherent)
 		assert.are.equal("Clone", result.trait_name)
 		assert.is_true(result.is_common_trait)
+	end)
+
+	it("classifies Ord and Hash as common traits", function()
+		local ord = classify.item(mock_item({ detail = " (as Ord)" }))
+		local hash = classify.item(mock_item({ detail = " (as Hash)" }))
+
+		assert.is_true(ord.is_common_trait)
+		assert.is_true(hash.is_common_trait)
 	end)
 
 	it("classifies trait method with non-common trait", function()
@@ -338,13 +347,14 @@ end)
 describe("config sync", function()
 	it("DEFAULT_CFG covers all compare config fields", function()
 		local expected_keys = {
-			"inherent_first",
 			"inscope_first",
+			"deprioritize_underscore",
+			"fields_first",
+			"inherent_first",
 			"deprioritize_postfix",
-			"deprioritize_common_traits",
 			"deprioritize_deref",
 			"deprioritize_borrow",
-			"deprioritize_underscore",
+			"deprioritize_common_traits",
 		}
 		for _, key in ipairs(expected_keys) do
 			assert.is_not_nil(DEFAULT_CFG[key], "DEFAULT_CFG missing key: " .. key)

@@ -19,6 +19,8 @@ local COMMON_TRAITS = {
 	TryFrom = true,
 	TryInto = true,
 	Default = true,
+	Ord = true,
+	Hash = true,
 }
 
 local DEREF_SET = {
@@ -31,12 +33,17 @@ local BORROW_SET = {
 	BorrowMut = true,
 }
 
+-- NOTE: LSP CompletionItemKind.Field (LSP spec §3.17, value 5).
+-- RA uses this for struct fields in dot-completion.
+local FIELD_KIND = 5
+
 -- NOTE: LSP CompletionItemKind.Snippet (LSP spec §3.17, value 15).
 -- RA uses this for postfix completions (.if, .match, .let).
 -- Non-postfix RA snippets (pd, ppd) also get this kind but are rare and fine to deprioritize.
 local SNIPPET_KIND = 15
 
 ---@class blink-cmp-rust.Classification
+---@field is_field boolean
 ---@field is_inherent boolean
 ---@field needs_import boolean
 ---@field trait_name string?
@@ -48,12 +55,13 @@ local SNIPPET_KIND = 15
 
 ---@class blink-cmp-rust.CompareConfig
 ---@field inscope_first boolean?
+---@field deprioritize_underscore boolean?
+---@field fields_first boolean?
 ---@field inherent_first boolean?
 ---@field deprioritize_postfix boolean?
 ---@field deprioritize_deref boolean?
 ---@field deprioritize_borrow boolean?
 ---@field deprioritize_common_traits boolean?
----@field deprioritize_underscore boolean?
 
 ---@param item table
 ---@param extra_traits table<string, boolean>?
@@ -64,6 +72,7 @@ function M.item(item, extra_traits)
 	local is_inherent = trait_name == nil
 	local needs_import = item.data and item.data.imports and #item.data.imports > 0
 	local is_postfix = item.kind == SNIPPET_KIND
+	local is_field = item.kind == FIELD_KIND
 	local is_underscore = item.label and item.label:sub(1, 1) == "_"
 
 	local is_common_trait = false
@@ -72,6 +81,7 @@ function M.item(item, extra_traits)
 	end
 
 	return {
+		is_field = is_field,
 		is_inherent = is_inherent,
 		needs_import = needs_import or false,
 		trait_name = trait_name,
@@ -87,8 +97,6 @@ end
 ---@param b table
 ---@param cfg blink-cmp-rust.CompareConfig
 ---@return boolean|nil
--- NOTE: Check order differs from the README priority list but is functionally
--- equivalent because the categories are mutually exclusive in practice.
 function M.compare(a, b, cfg)
 	if not a._rust or not b._rust then
 		return nil
@@ -98,6 +106,14 @@ function M.compare(a, b, cfg)
 
 	if cfg.inscope_first and ar.needs_import ~= br.needs_import then
 		return br.needs_import
+	end
+
+	if cfg.deprioritize_underscore and ar.is_underscore ~= br.is_underscore then
+		return br.is_underscore
+	end
+
+	if cfg.fields_first and ar.is_field ~= br.is_field then
+		return ar.is_field
 	end
 
 	if cfg.inherent_first and ar.is_inherent ~= br.is_inherent then
@@ -118,10 +134,6 @@ function M.compare(a, b, cfg)
 
 	if cfg.deprioritize_common_traits and ar.is_common_trait ~= br.is_common_trait then
 		return br.is_common_trait
-	end
-
-	if cfg.deprioritize_underscore and ar.is_underscore ~= br.is_underscore then
-		return br.is_underscore
 	end
 
 	return nil
