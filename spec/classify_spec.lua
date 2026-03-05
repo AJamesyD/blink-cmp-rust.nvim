@@ -401,11 +401,21 @@ describe("cross-category integration (classify.item → classify.compare)", func
 		assert.is_false(classify.compare(underscore_field, method, DEFAULT_CFG))
 	end)
 
-	it("deref sorts below inherent", function()
+	it("deref sorts below inherent, above common trait", function()
 		local inherent = make({ label = "push" })
 		local deref = make({ label = "len", detail = " (as Deref)" })
+		local common = make({ label = "clone", detail = " (as Clone)" })
 		assert.is_true(classify.compare(inherent, deref, DEFAULT_CFG))
-		assert.is_false(classify.compare(deref, inherent, DEFAULT_CFG))
+		assert.is_true(classify.compare(deref, common, DEFAULT_CFG))
+		assert.is_false(classify.compare(common, deref, DEFAULT_CFG))
+	end)
+
+	it("borrow sorts below deref, above common trait", function()
+		local deref = make({ label = "len", detail = " (as Deref)" })
+		local borrow = make({ label = "borrow", detail = " (as Borrow)" })
+		local common = make({ label = "clone", detail = " (as Clone)" })
+		assert.is_true(classify.compare(deref, borrow, DEFAULT_CFG))
+		assert.is_true(classify.compare(borrow, common, DEFAULT_CFG))
 	end)
 end)
 

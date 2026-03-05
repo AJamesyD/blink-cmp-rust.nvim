@@ -124,16 +124,16 @@ function M.compare(a, b, cfg)
 		return br.is_postfix
 	end
 
-	if cfg.deprioritize_deref and ar.is_deref ~= br.is_deref then
-		return br.is_deref
+	if cfg.deprioritize_common_traits and ar.is_common_trait ~= br.is_common_trait then
+		return br.is_common_trait
 	end
 
 	if cfg.deprioritize_borrow and ar.is_borrow ~= br.is_borrow then
 		return br.is_borrow
 	end
 
-	if cfg.deprioritize_common_traits and ar.is_common_trait ~= br.is_common_trait then
-		return br.is_common_trait
+	if cfg.deprioritize_deref and ar.is_deref ~= br.is_deref then
+		return br.is_deref
 	end
 
 	return nil
