@@ -27,6 +27,7 @@ local DEFAULT_CONFIG = {
 
 local config = vim.tbl_deep_extend("force", DEFAULT_CONFIG, {})
 local extra_traits = {}
+local enabled = true
 
 ---@param opts blink-cmp-rust.Config?
 function M.setup(opts)
@@ -37,11 +38,27 @@ function M.setup(opts)
 	end
 end
 
----@param ctx table
+---@return boolean
+function M.toggle()
+	enabled = not enabled
+	return enabled
+end
+
+---@param state boolean
+function M.enable(state)
+	enabled = state
+end
+
+---@return boolean
+function M.is_enabled()
+	return enabled
+end
+
+---@param _ctx table
 ---@param items table[]
 ---@return table[]
 function M.transform_items(_ctx, items)
-	if vim.bo.filetype ~= "rust" then
+	if not enabled or vim.bo.filetype ~= "rust" then
 		return items
 	end
 
@@ -86,6 +103,9 @@ end
 ---@param b table
 ---@return boolean|nil
 function M.compare(a, b)
+	if not enabled then
+		return nil
+	end
 	return classify.compare(a, b, config)
 end
 
