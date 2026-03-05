@@ -26,3 +26,9 @@ jobs:
           token: ${{ secrets.GITHUB_TOKEN }}
           version: 0.20.0
           args: --check lua/ spec/
+      - uses: leafo/gh-actions-lua@v10
+        with:
+          luaVersion: "5.1"
+      - uses: leafo/gh-actions-luarocks@v4
+      - run: luarocks install luacheck
+      - run: luacheck lua/ spec/
