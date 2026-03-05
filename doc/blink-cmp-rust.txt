@@ -10,6 +10,7 @@ Table of Contents                           *blink-cmp-rust-table-of-contents*
   - Configuration           |blink-cmp-rust-blink-cmp-rust.nvim-configuration|
   - Runtime toggle         |blink-cmp-rust-blink-cmp-rust.nvim-runtime-toggle|
   - How it works             |blink-cmp-rust-blink-cmp-rust.nvim-how-it-works|
+  - Troubleshooting       |blink-cmp-rust-blink-cmp-rust.nvim-troubleshooting|
   - Credits                       |blink-cmp-rust-blink-cmp-rust.nvim-credits|
   - License                       |blink-cmp-rust-blink-cmp-rust.nvim-license|
 2. Links                                                |blink-cmp-rust-links|
@@ -207,6 +208,9 @@ Simple keymap:
     end, { desc = "Toggle Rust completion sorting" })
 <
 
+To keep this binding out of non-Rust buffers, you can put it in
+`after/ftplugin/rust.lua` instead of your global keymaps.
+
 Advanced: snacks.nvim toggle integration ~
 
 If you use snacks.nvim <https://github.com/folke/snacks.nvim>, you can register
@@ -245,7 +249,8 @@ lowest):
 
 Within each tier, blink.cmp’s normal fuzzy scoring applies.
 
-Troubleshooting ~
+
+TROUBLESHOOTING           *blink-cmp-rust-blink-cmp-rust.nvim-troubleshooting*
 
 
 COMPLETIONS LOOK THE SAME AFTER INSTALLING ~
