@@ -166,12 +166,55 @@ All sorting features are enabled by default. Set any option to `false` to disabl
 
     -- Import path prefixes to filter out entirely (completions are removed,
     -- not just deprioritized). Matches against the full import path:
-    --   filter_imports = { "tokio::runtime" }  -- hides tokio::runtime::* re-exports
-    --   filter_imports = { "std::os" }         -- hides all std::os::* completions
+    --   filter_imports = { "tokio::runtime" }
+    --   filter_imports = { "std::os" }
     filter_imports = {},
   },
 }
 ```
+
+## Runtime toggle
+
+Disable the plugin at runtime to fall back to blink.cmp's default sorting.
+
+```lua
+-- flip on/off, returns new state
+require("blink-cmp-rust").toggle()
+-- explicitly enable/disable
+require("blink-cmp-rust").enable(true)
+require("blink-cmp-rust").enable(false)
+-- query current state
+require("blink-cmp-rust").is_enabled()
+```
+
+Simple keymap:
+
+```lua
+vim.keymap.set("n", "<leader>ur", function()
+	require("blink-cmp-rust").toggle()
+end, { desc = "Toggle Rust completion sorting" })
+```
+
+<details>
+<summary>Advanced: snacks.nvim toggle integration</summary>
+
+If you use [snacks.nvim](https://github.com/folke/snacks.nvim), you can register a proper toggle with notifications and which-key support:
+
+```lua
+require("snacks")
+	.toggle({
+		name = "Rust Completion Sorting",
+		get = function()
+			return require("blink-cmp-rust").is_enabled()
+		end,
+		set = function(state)
+			require("blink-cmp-rust").enable(state)
+		end,
+	})
+	:map("<leader>ur")
+```
+
+</details>
 
 ## How it works
 
@@ -204,10 +247,7 @@ Within each tier, blink.cmp's normal fuzzy scoring applies. Disabled tiers (via 
 
 ```lua
 -- Add temporarily inside the transform_items wrapper in your blink.cmp config:
-vim.fn.writefile(
-  { vim.inspect(items[1]) },
-  "/tmp/blink-rust-diag.log", "a"
-)
+vim.fn.writefile({ vim.inspect(items[1]) }, "/tmp/blink-rust-diag.log", "a")
 ```
 
 If items have a `_rust` field in the output, the plugin is classifying them correctly.
