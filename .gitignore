@@ -1,1 +1,5 @@
 .direnv/
+
+# examples/demo/ Cargo project
+target/
+Cargo.lock
