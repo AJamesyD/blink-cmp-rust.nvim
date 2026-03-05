@@ -125,47 +125,37 @@ All sorting features are enabled by default. Set any option to `false` to disabl
 {
   "AJamesyD/blink-cmp-rust.nvim",
   opts = {
-    -- true:  impl MyStruct methods appear above trait methods
-    -- false: inherent and trait methods are interleaved by fuzzy score
+    -- Show methods from `impl MyStruct` above trait methods like clone() or eq().
     inherent_first = true,
 
-    -- true:  already-imported items appear above auto-import suggestions
-    -- false: imported and not-yet-imported items are interleaved by fuzzy score
+    -- Show already-imported items above completions that would auto-import.
     inscope_first = true,
 
-    -- true:  postfix completions (e.g. .if, .match, .let) sink to the bottom
-    -- false: postfix completions sort normally
+    -- Push postfix completions (.if, .match, .let) to the bottom.
     deprioritize_postfix = true,
 
-    -- true:  common trait methods (Clone, Copy, Drop, ToString, ToOwned,
-    --        PartialEq, PartialOrd, AsRef, AsMut, From, Into, TryFrom,
-    --        TryInto, Default) sink to the bottom
-    --        (Deref/Borrow have their own flags and are not included here)
-    -- false: common trait methods sort like any other trait method
+    -- Push common trait methods to the bottom: Clone, Copy, Drop, Default,
+    -- From, Into, TryFrom, TryInto, ToString, ToOwned, PartialEq, PartialOrd,
+    -- AsRef, AsMut. Deref and Borrow have their own flags below.
     deprioritize_common_traits = true,
 
-    -- true:  methods available through Deref/DerefMut coercion (e.g. str
-    --        methods on String) appear below the type's own methods
-    -- false: deref-forwarded methods sort like inherent methods
+    -- Push methods available through Deref/DerefMut coercion below the
+    -- type's own methods (e.g. str methods when completing on String).
     deprioritize_deref = true,
 
-    -- true:  methods from Borrow/BorrowMut appear below the type's own methods
-    -- false: borrow-forwarded methods sort like inherent methods
+    -- Push methods from Borrow/BorrowMut below the type's own methods.
     deprioritize_borrow = true,
 
-    -- true:  _prefixed items (e.g. _private_field) sink to the bottom
-    -- false: underscore-prefixed items sort normally
+    -- Push _prefixed items (_private_field, _unused) to the bottom.
     deprioritize_underscore = true,
 
-    -- Additional traits to treat as "common" (deprioritized).
-    -- Useful for traits that are rarely the completion you want:
-    --   extra_common_traits = { "Debug", "Display", "Iterator" }
+    -- Additional traits to treat as common and push to the bottom.
+    -- Example: { "Debug", "Display", "Iterator" }
     extra_common_traits = {},
 
-    -- Import path prefixes to filter out entirely (completions are removed,
-    -- not just deprioritized). Matches against the full import path:
-    --   filter_imports = { "tokio::runtime" }
-    --   filter_imports = { "std::os" }
+    -- Import paths to remove from completions entirely (not just deprioritized).
+    -- Matches against the full import path.
+    -- Example: { "tokio::runtime", "std::os" }
     filter_imports = {},
   },
 }
