@@ -38,6 +38,7 @@ local function mock_item(opts)
 	local item = {
 		label = opts.label or "test_method",
 		kind = opts.kind,
+		client_name = opts.client_name,
 	}
 
 	if opts.imports then
@@ -180,6 +181,72 @@ describe("init", function()
 			local b = { label = "test" }
 
 			assert.is_nil(init.compare(a, b))
+		end)
+
+		it("returns nil when disabled", function()
+			init.enable(false)
+			local a = { _rust = { needs_import = false } }
+			local b = { _rust = { needs_import = true } }
+
+			assert.is_nil(init.compare(a, b))
+		end)
+	end)
+
+	describe("enabled toggle", function()
+		it("is enabled by default", function()
+			assert.is_true(init.is_enabled())
+		end)
+
+		it("toggle flips state and returns new value", function()
+			assert.is_false(init.toggle())
+			assert.is_false(init.is_enabled())
+			assert.is_true(init.toggle())
+			assert.is_true(init.is_enabled())
+		end)
+
+		it("enable sets explicit state", function()
+			init.enable(false)
+			assert.is_false(init.is_enabled())
+			init.enable(true)
+			assert.is_true(init.is_enabled())
+		end)
+
+		it("transform_items skips classification when disabled", function()
+			init.enable(false)
+			local items = { mock_item() }
+			init.transform_items({}, items)
+
+			assert.is_nil(items[1]._rust)
+		end)
+	end)
+
+	describe("client_name filtering", function()
+		it("classifies items from rust-analyzer (hyphenated)", function()
+			local items = { mock_item({ client_name = "rust-analyzer" }) }
+			init.transform_items({}, items)
+
+			assert.is_not_nil(items[1]._rust)
+		end)
+
+		it("classifies items from rust_analyzer (underscored)", function()
+			local items = { mock_item({ client_name = "rust_analyzer" }) }
+			init.transform_items({}, items)
+
+			assert.is_not_nil(items[1]._rust)
+		end)
+
+		it("classifies items with nil client_name (older blink.cmp)", function()
+			local items = { mock_item({ client_name = nil }) }
+			init.transform_items({}, items)
+
+			assert.is_not_nil(items[1]._rust)
+		end)
+
+		it("skips items from non-RA servers", function()
+			local items = { mock_item({ client_name = "typescript" }) }
+			init.transform_items({}, items)
+
+			assert.is_nil(items[1]._rust)
 		end)
 	end)
 end)
