@@ -142,6 +142,15 @@ describe("classify.item", function()
 		local result = classify.item(item)
 
 		assert.is_true(result.is_postfix)
+		assert.is_false(result.is_inherent)
+	end)
+
+	it("identifies field", function()
+		local item = mock_item({ label = "my_field", kind = 5 })
+		local result = classify.item(item)
+
+		assert.is_true(result.is_field)
+		assert.is_true(result.is_inherent)
 	end)
 
 	it("identifies underscore prefix", function()
@@ -341,6 +350,62 @@ describe("classify.compare", function()
 
 		assert.is_true(classify.compare(best, worst, DEFAULT_CFG))
 		assert.is_false(classify.compare(worst, best, DEFAULT_CFG))
+	end)
+end)
+
+describe("cross-category integration (classify.item → classify.compare)", function()
+	-- Build items through classify.item so classification interactions are realistic
+	local function make(opts)
+		local item = mock_item(opts)
+		item._rust = classify.item(item)
+		return item
+	end
+
+	it("postfix sorts below deref method", function()
+		local postfix = make({ label = "if", kind = 15 })
+		local deref = make({ label = "len", detail = " (as Deref)" })
+
+		assert.is_true(classify.compare(deref, postfix, DEFAULT_CFG))
+		assert.is_false(classify.compare(postfix, deref, DEFAULT_CFG))
+	end)
+
+	it("postfix sorts below common trait method", function()
+		local postfix = make({ label = "match", kind = 15 })
+		local common = make({ label = "clone", detail = " (as Clone)" })
+
+		assert.is_true(classify.compare(common, postfix, DEFAULT_CFG))
+		assert.is_false(classify.compare(postfix, common, DEFAULT_CFG))
+	end)
+
+	it("postfix sorts below inherent method", function()
+		local postfix = make({ label = "if", kind = 15 })
+		local inherent = make({ label = "my_method" })
+
+		assert.is_true(classify.compare(inherent, postfix, DEFAULT_CFG))
+		assert.is_false(classify.compare(postfix, inherent, DEFAULT_CFG))
+	end)
+
+	it("field sorts above inherent method", function()
+		local field = make({ label = "name", kind = 5 })
+		local method = make({ label = "get_name" })
+
+		assert.is_true(classify.compare(field, method, DEFAULT_CFG))
+		assert.is_false(classify.compare(method, field, DEFAULT_CFG))
+	end)
+
+	it("underscore field sorts below non-underscore method", function()
+		local underscore_field = make({ label = "_id", kind = 5 })
+		local method = make({ label = "get_id" })
+
+		assert.is_true(classify.compare(method, underscore_field, DEFAULT_CFG))
+		assert.is_false(classify.compare(underscore_field, method, DEFAULT_CFG))
+	end)
+
+	it("deref sorts below inherent", function()
+		local inherent = make({ label = "push" })
+		local deref = make({ label = "len", detail = " (as Deref)" })
+		assert.is_true(classify.compare(inherent, deref, DEFAULT_CFG))
+		assert.is_false(classify.compare(deref, inherent, DEFAULT_CFG))
 	end)
 end)
 
