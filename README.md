@@ -4,10 +4,8 @@
 
 Rust-aware completion sorting for [blink.cmp](https://github.com/Saghen/blink.cmp).
 
-When you type `my_struct.` in Rust, rust-analyzer returns completions in an order dominated by fuzzy match score.
-Its own relevance adjustments are small (-1 for imports, -5 for traits) and easily overridden,
-so `clone()`, `into()`, and Deref-forwarded methods regularly appear above the methods you actually defined on the type.
-This plugin sorts completions by category (your methods first, trait noise last) with hard boundaries that fuzzy score cannot override.
+When you type `my_struct.` in Rust, `clone()`, `into()`, and other trait methods regularly appear above the methods you actually defined.
+This plugin fixes that by sorting completions into categories that fuzzy score can't override.
 
 ## What changes
 
@@ -17,7 +15,7 @@ This plugin sorts completions by category (your methods first, trait noise last)
   Deref/Borrow-forwarded methods, postfix completions, and underscore-prefixed items are pushed to the end.
 - **Unwanted imports hidden.** Optionally filter out completions from specific import paths entirely.
 
-Every feature can be toggled independently. The plugin only activates in Rust files; other filetypes are completely unaffected.
+Every feature is toggleable. Only activates in Rust files.
 
 ## Requirements
 
