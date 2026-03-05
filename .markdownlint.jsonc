@@ -1,0 +1,12 @@
+{
+  // line-length
+  "MD013": {
+    "line_length": 200
+  },
+  // headings
+  "MD022": {
+    "lines_above": 1
+  },
+  // first-line-heading
+  "MD041": false
+}

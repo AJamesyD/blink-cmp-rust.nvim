@@ -30,6 +30,7 @@
               pkgs.lua5_1
               pkgs.luajitPackages.busted
               pkgs.luajitPackages.luacheck
+              pkgs.markdownlint-cli2
               config.treefmt.build.wrapper
             ];
           };
