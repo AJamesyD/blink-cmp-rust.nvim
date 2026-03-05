@@ -1,0 +1,22 @@
+name: panvimdoc
+
+on:
+  push:
+    branches: [mainline]
+    paths: [README.md]
+
+permissions:
+  contents: write
+
+jobs:
+  docs:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: mkdir -p doc
+      - uses: kdheepak/panvimdoc@v4.0.1
+        with:
+          vimdoc: blink-cmp-rust
+      - uses: stefanzweifel/git-auto-commit-action@v4
+        with:
+          commit_message: "docs: auto-generate vimdoc"
