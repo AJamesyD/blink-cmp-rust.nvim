@@ -219,7 +219,7 @@ then sorted by this priority (highest to lowest):
 7. **Underscore-prefixed**: `_private_field`, `_unused`
 8. **Postfix**: `.if`, `.match`, `.let`
 
-Within each tier, blink.cmp's normal fuzzy scoring applies. Disabled tiers (via config) are skipped, so items in those categories sort by fuzzy score as if the plugin weren't installed.
+Within each tier, blink.cmp's normal fuzzy scoring applies.
 
 ## Troubleshooting
 
