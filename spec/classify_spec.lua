@@ -482,6 +482,14 @@ describe("cross-category integration (classify.item → classify.compare)", func
 		assert.is_true(classify.compare(borrow, common, DEFAULT_CFG))
 	end)
 
+	it("keyword sorts below common trait method", function()
+		local keyword = make({ label = "let", kind = 14 })
+		local common = make({ label = "clone", detail = " (as Clone)" })
+
+		assert.is_true(classify.compare(common, keyword, DEFAULT_CFG))
+		assert.is_false(classify.compare(keyword, common, DEFAULT_CFG))
+	end)
+
 	it("keyword sorts below inherent method", function()
 		local inherent = make({ label = "my_method" })
 		local keyword = make({ label = "let", kind = 14 })

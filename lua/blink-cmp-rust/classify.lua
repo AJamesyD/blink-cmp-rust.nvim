@@ -3,7 +3,7 @@
 -- Two things to keep in mind when changing this file:
 --
 -- Lua's table.sort is unstable. Returning nil from compare for two items
--- doesn't preserve their original order — it reshuffles them. If RA already
+-- doesn't preserve their original order; it reshuffles them. If RA already
 -- gets something right (e.g. fields above methods via sortText), encode it
 -- explicitly in the compare chain. The fields_first regression came from
 -- assuming nil-fallthrough would preserve RA's ordering. It doesn't.
@@ -92,14 +92,15 @@ local KEYWORD_KIND = 14
 ---@field deprioritize_text boolean?
 ---@field deprioritize_keywords boolean?
 
----@param item table
+---@param item blink.cmp.CompletionItem
 ---@param extra_traits table<string, boolean>?
 ---@return blink-cmp-rust.Classification
 function M.item(item, extra_traits)
 	local detail = item.labelDetails and item.labelDetails.detail
 	local trait_name = detail and detail:match(TRAIT_PATTERN)
 	local is_postfix = item.kind == SNIPPET_KIND
-	local is_inherent = trait_name == nil and not is_postfix
+	-- "Inherent" = defined directly on the type (impl T), not from a trait or non-method completion.
+	local is_inherent = trait_name == nil and not is_postfix and item.kind ~= KEYWORD_KIND and item.kind ~= TEXT_KIND
 	local needs_import = item.data and item.data.imports and #item.data.imports > 0
 	local is_field = item.kind == FIELD_KIND or item.kind == ENUM_MEMBER_KIND
 	local is_underscore = (item.label and item.label:sub(1, 1) == "_") or false
@@ -125,12 +126,15 @@ function M.item(item, extra_traits)
 end
 
 -- NOTE: The check order below differs from the tier numbering in README
--- ("How it works") but produces the same result. The flags are mutually
--- exclusive in practice (a Deref method can't also be a common trait, a
--- postfix can't carry a trait name), so the first differing flag always
--- matches the intended tier boundary.
----@param a table
----@param b table
+-- ("How it works") but produces the same result. Text and keywords are
+-- checked right after inherent so they sink below all trait-related tiers.
+-- Among the remaining flags (postfix, common_trait, deref, borrow), mutual
+-- exclusivity holds (a Deref method can't also be a common trait, etc.),
+-- so the first differing flag always matches the intended tier boundary.
+-- blink.cmp fuzzy.sorts contract: return true if a should rank above b,
+-- false if below, nil to express no opinion and defer to the next sort.
+---@param a blink.cmp.CompletionItem
+---@param b blink.cmp.CompletionItem
 ---@param cfg blink-cmp-rust.CompareConfig
 ---@return boolean|nil
 function M.compare(a, b, cfg)
@@ -156,6 +160,14 @@ function M.compare(a, b, cfg)
 		return ar.is_inherent
 	end
 
+	if cfg.deprioritize_text and ar.is_text ~= br.is_text then
+		return br.is_text
+	end
+
+	if cfg.deprioritize_keywords and ar.is_keyword ~= br.is_keyword then
+		return br.is_keyword
+	end
+
 	if cfg.deprioritize_postfix and ar.is_postfix ~= br.is_postfix then
 		return br.is_postfix
 	end
@@ -170,14 +182,6 @@ function M.compare(a, b, cfg)
 
 	if cfg.deprioritize_deref and ar.is_deref ~= br.is_deref then
 		return br.is_deref
-	end
-
-	if cfg.deprioritize_text and ar.is_text ~= br.is_text then
-		return br.is_text
-	end
-
-	if cfg.deprioritize_keywords and ar.is_keyword ~= br.is_keyword then
-		return br.is_keyword
 	end
 
 	return nil
