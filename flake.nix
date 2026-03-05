@@ -29,6 +29,7 @@
             packages = [
               pkgs.lua5_1
               pkgs.luajitPackages.busted
+              pkgs.luajitPackages.luacheck
               config.treefmt.build.wrapper
             ];
           };
