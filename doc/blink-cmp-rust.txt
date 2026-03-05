@@ -28,10 +28,14 @@ methods regularly appear above the methods you actually defined. This plugin
 fixes that by sorting completions into categories that fuzzy score can’t
 override.
 
+   Without plugin   With plugin
+  ---------------- -------------
+      [before]        [after]
 
 WHAT CHANGES                 *blink-cmp-rust-blink-cmp-rust.nvim-what-changes*
 
 - **Your methods first.** Methods from `impl MyStruct` appear above trait methods like `clone()` or `eq()`.
+- **Your fields first.** Struct fields appear above methods in dot-completion.
 - **Imported items first.** Completions already in scope appear above those that would trigger an auto-import.
 - **Noise sinks to the bottom.** Common trait methods (`Clone`, `Copy`, `Default`, `From`, `Into`, …),
     Deref/Borrow-forwarded methods, postfix completions, and underscore-prefixed items are pushed to the end.
@@ -73,7 +77,7 @@ Add as a dependency to your blink.cmp spec:
         opts.fuzzy = vim.tbl_deep_extend("force", opts.fuzzy or {}, {
           sorts = function()
             if vim.bo.filetype == "rust" then
-              return vim.list_extend({ rust_cmp.compare }, { "score", "sort_text" })
+              return { rust_cmp.compare, "score", "sort_text" }
             end
             return { "score", "sort_text" }
           end,
@@ -141,27 +145,28 @@ use this expanded snippet to compose with them instead of overwriting:
 
 CONFIGURATION               *blink-cmp-rust-blink-cmp-rust.nvim-configuration*
 
-All sorting features are enabled by default. Set any option to `false` to
-disable that sorting dimension. Items will be treated equally for that
-criterion and sorted by the remaining rules.
+All features are enabled by default and the defaults work well for most Rust
+codebases. You probably don’t need to change anything here. Set any option to
+`false` to turn off that rule; the remaining rules still apply.
 
 >lua
     {
       "AJamesyD/blink-cmp-rust.nvim",
       opts = {
-        -- Show methods from `impl MyStruct` above trait methods like clone() or eq().
-        inherent_first = true,
-    
         -- Show already-imported items above completions that would auto-import.
         inscope_first = true,
     
-        -- Push postfix completions (.if, .match, .let) to the bottom.
-        deprioritize_postfix = true,
+        -- Push _prefixed items (_private_field, _unused) to the bottom.
+        deprioritize_underscore = true,
     
-        -- Push common trait methods to the bottom: Clone, Copy, Drop, Default,
-        -- From, Into, TryFrom, TryInto, ToString, ToOwned, PartialEq, PartialOrd,
-        -- AsRef, AsMut. Deref and Borrow have their own flags below.
-        deprioritize_common_traits = true,
+        -- Show struct fields above methods in dot-completion.
+        fields_first = true,
+    
+        -- Show methods from `impl MyStruct` above trait methods like clone() or eq().
+        inherent_first = true,
+    
+        -- Push postfix completions (.if, .match, .let) and other snippets to the bottom.
+        deprioritize_postfix = true,
     
         -- Push methods available through Deref/DerefMut coercion below the
         -- type's own methods (e.g. str methods when completing on String).
@@ -170,15 +175,17 @@ criterion and sorted by the remaining rules.
         -- Push methods from Borrow/BorrowMut below the type's own methods.
         deprioritize_borrow = true,
     
-        -- Push _prefixed items (_private_field, _unused) to the bottom.
-        deprioritize_underscore = true,
+        -- Push common trait methods to the bottom: Clone, Copy, Drop, Default,
+        -- From, Into, TryFrom, TryInto, ToString, ToOwned, PartialEq, PartialOrd,
+        -- Ord, Hash, AsRef, AsMut. Deref and Borrow have their own flags above.
+        deprioritize_common_traits = true,
     
         -- Additional traits to treat as common and push to the bottom.
-        -- Example: { "Debug", "Display", "Iterator" }
+        -- Example: { "Debug", "Display" }
         extra_common_traits = {},
     
         -- Import paths to remove from completions entirely (not just deprioritized).
-        -- Matches against the full import path.
+        -- Prefix-matches against the full import path, so "std::os" also filters "std::os::unix".
         -- Example: { "tokio::runtime", "std::os" }
         filter_imports = {},
       },
@@ -239,13 +246,14 @@ rust-analyzer’s completion response, then sorted by this priority (highest to
 lowest):
 
 1. **In-scope**: items already imported
-2. **Inherent**: methods defined directly on the type (`impl MyStruct`)
-3. **Non-common trait**: trait methods not in the common/deref/borrow lists (implicit: anything not deprioritized)
-4. **Deref-forwarded**: methods available through `Deref`/`DerefMut` coercion
-5. **Borrow-forwarded**: methods from `Borrow`/`BorrowMut`
-6. **Common trait**: `Clone`, `Copy`, `Default`, `From`, `Into`, etc.
-7. **Underscore-prefixed**: `_private_field`, `_unused`
-8. **Postfix**: `.if`, `.match`, `.let`
+2. **Non-underscore**: `_prefixed` items sink below everything else
+3. **Fields**: struct fields above methods
+4. **Inherent**: methods defined directly on the type (`impl MyStruct`)
+5. **Non-common trait**: other trait methods (not in the common/deref/borrow lists)
+6. **Deref-forwarded**: methods available through `Deref`/`DerefMut` coercion
+7. **Borrow-forwarded**: methods from `Borrow`/`BorrowMut`
+8. **Common trait**: `Clone`, `Copy`, `Default`, `From`, `Into`, etc.
+9. **Postfix**: `.if`, `.match`, `.let`
 
 Within each tier, blink.cmp’s normal fuzzy scoring applies.
 
