@@ -14,10 +14,10 @@ This plugin fixes that by sorting completions into categories that fuzzy score c
 ## What changes
 
 - **Your methods first.** Methods from `impl MyStruct` appear above trait methods like `clone()` or `eq()`.
-- **Your fields first.** Struct fields appear above methods in dot-completion.
+- **Your fields first.** Struct fields appear above methods.
 - **Imported items first.** Completions already in scope appear above those that would trigger an auto-import.
 - **Noise sinks to the bottom.** Common trait methods (`Clone`, `Copy`, `Default`, `From`, `Into`, ...),
-  Deref/Borrow-forwarded methods, postfix completions, and underscore-prefixed items are pushed to the end.
+  Deref/Borrow-forwarded methods, postfix completions, underscore-prefixed items, keywords, and text completions are pushed to the end.
 - **Unwanted imports hidden.** Optionally filter out completions from specific import paths entirely.
 
 Every feature is toggleable. Only activates in Rust files.
@@ -138,7 +138,7 @@ Set any option to `false` to turn off that rule; the remaining rules still apply
     -- Push _prefixed items (_private_field, _unused) to the bottom.
     deprioritize_underscore = true,
 
-    -- Show struct fields above methods in dot-completion.
+    -- Show struct fields above methods.
     fields_first = true,
 
     -- Show methods from `impl MyStruct` above trait methods like clone() or eq().
@@ -158,6 +158,14 @@ Set any option to `false` to turn off that rule; the remaining rules still apply
     -- From, Into, TryFrom, TryInto, ToString, ToOwned, PartialEq, PartialOrd,
     -- Ord, Hash, AsRef, AsMut. Deref and Borrow have their own flags above.
     deprioritize_common_traits = true,
+
+    -- Push keyword completions (let, fn, struct, mod, ...) below other items.
+    -- Mainly helps in non-dot contexts where keywords crowd out real symbols.
+    deprioritize_keywords = true,
+
+    -- Push text completions below other items. Text items are rarely useful
+    -- in Rust completion and tend to be noise.
+    deprioritize_text = true,
 
     -- Additional traits to treat as common and push to the bottom.
     -- Example: { "Debug", "Display" }
@@ -231,6 +239,8 @@ then sorted by this priority (highest to lowest):
 7. **Borrow-forwarded**: methods from `Borrow`/`BorrowMut`
 8. **Common trait**: `Clone`, `Copy`, `Default`, `From`, `Into`, etc.
 9. **Postfix**: `.if`, `.match`, `.let`
+10. **Keywords**: `let`, `fn`, `struct`, `mod`, ...
+11. **Text**: text completions
 
 Within each tier, blink.cmp's normal fuzzy scoring applies.
 

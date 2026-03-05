@@ -12,6 +12,8 @@ local DEFAULT_CFG = {
 	deprioritize_deref = true,
 	deprioritize_borrow = true,
 	deprioritize_common_traits = true,
+	deprioritize_keywords = true,
+	deprioritize_text = true,
 }
 
 -- Helper to create mock LSP completion items
@@ -174,6 +176,30 @@ describe("classify.item", function()
 
 		assert.is_false(result.needs_import)
 	end)
+
+	it("identifies keyword completion", function()
+		local item = mock_item({ label = "let", kind = 14 })
+		local result = classify.item(item)
+
+		assert.is_true(result.is_keyword)
+		assert.is_false(result.is_text)
+	end)
+
+	it("identifies text completion", function()
+		local item = mock_item({ label = "some_text", kind = 1 })
+		local result = classify.item(item)
+
+		assert.is_true(result.is_text)
+		assert.is_false(result.is_keyword)
+	end)
+
+	it("does not flag regular items as keyword or text", function()
+		local item = mock_item({ label = "my_method", kind = 2 }) -- Method
+		local result = classify.item(item)
+
+		assert.is_false(result.is_keyword)
+		assert.is_false(result.is_text)
+	end)
 end)
 
 describe("classify.compare", function()
@@ -295,6 +321,30 @@ describe("classify.compare", function()
 		assert.is_false(classify.compare(underscore, normal, DEFAULT_CFG))
 	end)
 
+	it("deprioritizes keywords", function()
+		local normal = { _rust = { is_keyword = false, is_text = false } }
+		local keyword = { _rust = { is_keyword = true, is_text = false } }
+
+		assert.is_true(classify.compare(normal, keyword, DEFAULT_CFG))
+		assert.is_false(classify.compare(keyword, normal, DEFAULT_CFG))
+	end)
+
+	it("deprioritizes text", function()
+		local normal = { _rust = { is_keyword = false, is_text = false } }
+		local text = { _rust = { is_keyword = false, is_text = true } }
+
+		assert.is_true(classify.compare(normal, text, DEFAULT_CFG))
+		assert.is_false(classify.compare(text, normal, DEFAULT_CFG))
+	end)
+
+	it("deprioritizes text below keywords", function()
+		local keyword = { _rust = { is_keyword = true, is_text = false } }
+		local text = { _rust = { is_keyword = false, is_text = true } }
+
+		assert.is_true(classify.compare(keyword, text, DEFAULT_CFG))
+		assert.is_false(classify.compare(text, keyword, DEFAULT_CFG))
+	end)
+
 	it("returns nil when items are equal", function()
 		local a = { _rust = { needs_import = false, is_inherent = true, is_postfix = false } }
 		local b = { _rust = { needs_import = false, is_inherent = true, is_postfix = false } }
@@ -334,6 +384,8 @@ describe("classify.compare", function()
 				is_borrow = false,
 				is_common_trait = false,
 				is_underscore = false,
+				is_keyword = false,
+				is_text = false,
 			},
 		}
 		local worst = {
@@ -345,6 +397,8 @@ describe("classify.compare", function()
 				is_borrow = true,
 				is_common_trait = true,
 				is_underscore = true,
+				is_keyword = true,
+				is_text = true,
 			},
 		}
 
@@ -419,6 +473,22 @@ describe("cross-category integration (classify.item → classify.compare)", func
 		assert.is_true(classify.compare(deref, borrow, DEFAULT_CFG))
 		assert.is_true(classify.compare(borrow, common, DEFAULT_CFG))
 	end)
+
+	it("keyword sorts below inherent method", function()
+		local inherent = make({ label = "my_method" })
+		local keyword = make({ label = "let", kind = 14 })
+
+		assert.is_true(classify.compare(inherent, keyword, DEFAULT_CFG))
+		assert.is_false(classify.compare(keyword, inherent, DEFAULT_CFG))
+	end)
+
+	it("text sorts below keyword", function()
+		local keyword = make({ label = "let", kind = 14 })
+		local text = make({ label = "some_text", kind = 1 })
+
+		assert.is_true(classify.compare(keyword, text, DEFAULT_CFG))
+		assert.is_false(classify.compare(text, keyword, DEFAULT_CFG))
+	end)
 end)
 
 describe("config sync", function()
@@ -432,6 +502,8 @@ describe("config sync", function()
 			"deprioritize_deref",
 			"deprioritize_borrow",
 			"deprioritize_common_traits",
+			"deprioritize_keywords",
+			"deprioritize_text",
 		}
 		for _, key in ipairs(expected_keys) do
 			assert.is_not_nil(DEFAULT_CFG[key], "DEFAULT_CFG missing key: " .. key)

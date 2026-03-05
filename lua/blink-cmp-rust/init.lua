@@ -21,6 +21,8 @@ end
 ---@field deprioritize_deref boolean?
 ---@field deprioritize_borrow boolean?
 ---@field deprioritize_common_traits boolean?
+---@field deprioritize_keywords boolean?
+---@field deprioritize_text boolean?
 ---@field extra_common_traits string[]?
 ---@field filter_imports string[]?
 
@@ -33,6 +35,8 @@ local DEFAULT_CONFIG = {
 	deprioritize_deref = true,
 	deprioritize_borrow = true,
 	deprioritize_common_traits = true,
+	deprioritize_keywords = true,
+	deprioritize_text = true,
 	extra_common_traits = {},
 	filter_imports = {},
 }

@@ -57,6 +57,12 @@ local FIELD_KIND = 5
 -- Non-postfix RA snippets (pd, ppd) also get this kind but are rare and fine to deprioritize.
 local SNIPPET_KIND = 15
 
+-- NOTE: LSP CompletionItemKind.Text (LSP spec §3.17, value 1).
+local TEXT_KIND = 1
+
+-- NOTE: LSP CompletionItemKind.Keyword (LSP spec §3.17, value 14).
+local KEYWORD_KIND = 14
+
 ---@class blink-cmp-rust.Classification
 ---@field is_field boolean
 ---@field is_inherent boolean
@@ -67,6 +73,8 @@ local SNIPPET_KIND = 15
 ---@field is_deref boolean
 ---@field is_borrow boolean
 ---@field is_underscore boolean
+---@field is_keyword boolean
+---@field is_text boolean
 
 ---@class blink-cmp-rust.CompareConfig
 ---@field inscope_first boolean?
@@ -77,6 +85,8 @@ local SNIPPET_KIND = 15
 ---@field deprioritize_deref boolean?
 ---@field deprioritize_borrow boolean?
 ---@field deprioritize_common_traits boolean?
+---@field deprioritize_text boolean?
+---@field deprioritize_keywords boolean?
 
 ---@param item table
 ---@param extra_traits table<string, boolean>?
@@ -105,6 +115,8 @@ function M.item(item, extra_traits)
 		is_deref = trait_name and DEREF_SET[trait_name] or false,
 		is_borrow = trait_name and BORROW_SET[trait_name] or false,
 		is_underscore = is_underscore,
+		is_keyword = item.kind == KEYWORD_KIND,
+		is_text = item.kind == TEXT_KIND,
 	}
 end
 
@@ -149,6 +161,14 @@ function M.compare(a, b, cfg)
 
 	if cfg.deprioritize_deref and ar.is_deref ~= br.is_deref then
 		return br.is_deref
+	end
+
+	if cfg.deprioritize_text and ar.is_text ~= br.is_text then
+		return br.is_text
+	end
+
+	if cfg.deprioritize_keywords and ar.is_keyword ~= br.is_keyword then
+		return br.is_keyword
 	end
 
 	return nil
