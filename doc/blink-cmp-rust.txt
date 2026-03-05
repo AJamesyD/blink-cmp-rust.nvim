@@ -34,7 +34,8 @@ WHAT CHANGES                 *blink-cmp-rust-blink-cmp-rust.nvim-what-changes*
 
 - **Your methods first.** Methods from `impl MyStruct` appear above trait methods like `clone()` or `eq()`.
 - **Imported items first.** Completions already in scope appear above those that would trigger an auto-import.
-- **Noise sinks to the bottom.** Common trait methods (`Clone`, `Copy`, `Default`, `From`, `Into`, …), Deref/Borrow-forwarded methods, postfix completions, and underscore-prefixed items are pushed to the end.
+- **Noise sinks to the bottom.** Common trait methods (`Clone`, `Copy`, `Default`, `From`, `Into`, …),
+    Deref/Borrow-forwarded methods, postfix completions, and underscore-prefixed items are pushed to the end.
 - **Unwanted imports hidden.** Optionally filter out completions from specific import paths entirely.
 
 Every feature can be toggled independently. The plugin only activates in Rust
