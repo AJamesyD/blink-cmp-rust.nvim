@@ -54,7 +54,7 @@ Add as a dependency to your blink.cmp spec:
     opts.fuzzy = vim.tbl_deep_extend("force", opts.fuzzy or {}, {
       sorts = function()
         if vim.bo.filetype == "rust" then
-          return vim.list_extend({ rust_cmp.compare }, { "score", "sort_text" })
+          return { rust_cmp.compare, "score", "sort_text" }
         end
         return { "score", "sort_text" }
       end,
@@ -124,7 +124,9 @@ expanded snippet to compose with them instead of overwriting:
 
 ## Configuration
 
-All sorting features are enabled by default. Set any option to `false` to disable that sorting dimension. Items will be treated equally for that criterion and sorted by the remaining rules.
+All features are enabled by default and the defaults work well for most Rust codebases.
+You probably don't need to change anything here.
+Set any option to `false` to turn off that rule; the remaining rules still apply.
 
 ```lua
 {
@@ -162,7 +164,7 @@ All sorting features are enabled by default. Set any option to `false` to disabl
     extra_common_traits = {},
 
     -- Import paths to remove from completions entirely (not just deprioritized).
-    -- Matches against the full import path.
+    -- Prefix-matches against the full import path, so "std::os" also filters "std::os::unix".
     -- Example: { "tokio::runtime", "std::os" }
     filter_imports = {},
   },
@@ -224,7 +226,7 @@ then sorted by this priority (highest to lowest):
 2. **Non-underscore**: `_prefixed` items sink below everything else
 3. **Fields**: struct fields above methods
 4. **Inherent**: methods defined directly on the type (`impl MyStruct`)
-5. **Non-common trait**: trait methods not in the common/deref/borrow lists (implicit: anything not deprioritized)
+5. **Non-common trait**: other trait methods (not in the common/deref/borrow lists)
 6. **Deref-forwarded**: methods available through `Deref`/`DerefMut` coercion
 7. **Borrow-forwarded**: methods from `Borrow`/`BorrowMut`
 8. **Common trait**: `Clone`, `Copy`, `Default`, `From`, `Into`, etc.

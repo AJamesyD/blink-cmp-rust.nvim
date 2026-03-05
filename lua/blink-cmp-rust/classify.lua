@@ -69,9 +69,9 @@ local SNIPPET_KIND = 15
 function M.item(item, extra_traits)
 	local detail = item.labelDetails and item.labelDetails.detail
 	local trait_name = detail and detail:match(TRAIT_PATTERN)
-	local needs_import = item.data and item.data.imports and #item.data.imports > 0
 	local is_postfix = item.kind == SNIPPET_KIND
 	local is_inherent = trait_name == nil and not is_postfix
+	local needs_import = item.data and item.data.imports and #item.data.imports > 0
 	local is_field = item.kind == FIELD_KIND
 	local is_underscore = item.label and item.label:sub(1, 1) == "_" or false
 
