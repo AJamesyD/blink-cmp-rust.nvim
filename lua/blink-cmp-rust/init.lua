@@ -2,6 +2,16 @@ local classify = require("blink-cmp-rust.classify")
 
 local M = {}
 
+-- rustaceanvim uses "rust-analyzer", nvim-lspconfig uses "rust_analyzer"
+local RA_NAMES = { ["rust-analyzer"] = true, ["rust_analyzer"] = true }
+
+---@param item table
+---@return boolean
+local function is_rust_analyzer(item)
+	-- nil client_name means blink.cmp didn't stamp it (older versions); classify anyway
+	return item.client_name == nil or RA_NAMES[item.client_name] == true
+end
+
 ---@class blink-cmp-rust.Config
 ---@field inscope_first boolean?
 ---@field deprioritize_underscore boolean?
@@ -67,14 +77,18 @@ function M.transform_items(_ctx, items)
 	local has_filters = #config.filter_imports > 0
 	if not has_filters then
 		for _, item in ipairs(items) do
-			item._rust = classify.item(item, extra_traits)
+			if is_rust_analyzer(item) then
+				item._rust = classify.item(item, extra_traits)
+			end
 		end
 		return items
 	end
 
 	local filtered = {}
 	for _, item in ipairs(items) do
-		if not M._should_filter(item) then
+		if not is_rust_analyzer(item) then
+			filtered[#filtered + 1] = item
+		elseif not M._should_filter(item) then
 			item._rust = classify.item(item, extra_traits)
 			filtered[#filtered + 1] = item
 		end
