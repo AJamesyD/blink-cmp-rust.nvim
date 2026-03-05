@@ -52,6 +52,10 @@ local BORROW_SET = {
 -- RA uses this for struct fields in dot-completion.
 local FIELD_KIND = 5
 
+-- NOTE: LSP CompletionItemKind.EnumMember (LSP spec §3.17, value 20).
+-- Treated as field-like: in value position, you want MyEnum::Variant above clone().
+local ENUM_MEMBER_KIND = 20
+
 -- NOTE: LSP CompletionItemKind.Snippet (LSP spec §3.17, value 15).
 -- RA uses this for postfix completions (.if, .match, .let).
 -- Non-postfix RA snippets (pd, ppd) also get this kind but are rare and fine to deprioritize.
@@ -97,7 +101,7 @@ function M.item(item, extra_traits)
 	local is_postfix = item.kind == SNIPPET_KIND
 	local is_inherent = trait_name == nil and not is_postfix
 	local needs_import = item.data and item.data.imports and #item.data.imports > 0
-	local is_field = item.kind == FIELD_KIND
+	local is_field = item.kind == FIELD_KIND or item.kind == ENUM_MEMBER_KIND
 	local is_underscore = item.label and item.label:sub(1, 1) == "_" or false
 
 	local is_common_trait = false

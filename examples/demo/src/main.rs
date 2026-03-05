@@ -5,6 +5,13 @@ struct Task {
     _internal_id: u64,
 }
 
+#[allow(unused)]
+enum Status {
+    Pending,
+    InProgress,
+    Done,
+}
+
 impl Task {
     #[allow(unused)]
     fn mark_done(&mut self) {
@@ -35,4 +42,6 @@ fn main() {
     };
 
     // UNCOMMENT: task.
+
+    // UNCOMMENT: let s: Status = Status::
 }

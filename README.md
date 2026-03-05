@@ -14,7 +14,7 @@ This plugin fixes that by sorting completions into categories that fuzzy score c
 ## What changes
 
 - **Your methods first.** Methods from `impl MyStruct` appear above trait methods like `clone()` or `eq()`.
-- **Your fields first.** Struct fields appear above methods.
+- **Your fields first.** Struct fields and enum members appear above methods.
 - **Imported items first.** Completions already in scope appear above those that would trigger an auto-import.
 - **Noise sinks to the bottom.** Common trait methods (`Clone`, `Copy`, `Default`, `From`, `Into`, ...),
   Deref/Borrow-forwarded methods, postfix completions, underscore-prefixed items, keywords, and text completions are pushed to the end.
@@ -138,7 +138,7 @@ Set any option to `false` to turn off that rule; the remaining rules still apply
     -- Push _prefixed items (_private_field, _unused) to the bottom.
     deprioritize_underscore = true,
 
-    -- Show struct fields above methods.
+    -- Show struct fields and enum members above methods.
     fields_first = true,
 
     -- Show methods from `impl MyStruct` above trait methods like clone() or eq().
@@ -232,7 +232,7 @@ then sorted by this priority (highest to lowest):
 
 1. **In-scope**: items already imported
 2. **Non-underscore**: `_prefixed` items sink below everything else
-3. **Fields**: struct fields above methods
+3. **Fields**: struct fields and enum members above methods
 4. **Inherent**: methods defined directly on the type (`impl MyStruct`)
 5. **Non-common trait**: other trait methods (not in the common/deref/borrow lists)
 6. **Deref-forwarded**: methods available through `Deref`/`DerefMut` coercion

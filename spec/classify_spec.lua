@@ -155,6 +155,14 @@ describe("classify.item", function()
 		assert.is_true(result.is_inherent)
 	end)
 
+	it("identifies enum member as field", function()
+		local item = mock_item({ label = "Variant", kind = 20 })
+		local result = classify.item(item)
+
+		assert.is_true(result.is_field)
+		assert.is_true(result.is_inherent)
+	end)
+
 	it("identifies underscore prefix", function()
 		local item = mock_item({ label = "_private_method" })
 		local result = classify.item(item)
