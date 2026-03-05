@@ -1,30 +1,35 @@
-#[derive(Clone, Debug, Default, PartialEq, Eq, Hash, PartialOrd, Ord)]
-struct Task {
-    title: String,
-    done: bool,
-    _internal_id: u64,
-}
+use std::collections::BTreeSet;
 
-#[allow(unused)]
+#[derive(Clone, Debug, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 enum Status {
+    #[default]
     Pending,
     InProgress,
     Done,
 }
 
+#[derive(Clone, Debug, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+struct Task {
+    title: String,
+    status: Status,
+    _internal_id: u64,
+}
+
 impl Task {
-    #[allow(unused)]
     fn mark_done(&mut self) {
-        self.done = true;
+        self.status = Status::Done;
     }
 
     fn description(&self) -> String {
-        format!("[{}] {}", if self.done { "x" } else { " " }, self.title)
+        let check = match self.status {
+            Status::Done => "x",
+            _ => " ",
+        };
+        format!("[{check}] {}", self.title)
     }
 
-    #[allow(unused)]
     fn is_overdue(&self) -> bool {
-        !self.done
+        !matches!(self.status, Status::Done)
     }
 }
 
@@ -35,13 +40,27 @@ impl std::fmt::Display for Task {
 }
 
 fn main() {
-    #[allow(unused)]
+    let mut tasks = BTreeSet::new();
+
     let mut task = Task {
         title: "Write docs".into(),
         ..Default::default()
     };
+    task.mark_done();
+    tasks.insert(task.clone());
 
-    // UNCOMMENT: task.
+    tasks.insert(Task {
+        title: "Review PR".into(),
+        ..Default::default()
+    });
 
-    // UNCOMMENT: let s: Status = Status::
+    for task in &tasks {
+        if task.is_overdue() {
+            println!("{task}");
+        }
+    }
+
+    // To trigger the completion menu for screenshots, type:
+    //   task.       — shows methods and fields on Task
+    //   Status::    — shows enum variants
 }
