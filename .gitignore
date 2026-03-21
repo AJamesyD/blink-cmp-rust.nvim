@@ -1,4 +1,5 @@
 .direnv/
+doc/tags
 
 # examples/demo/ Cargo project
 target/
