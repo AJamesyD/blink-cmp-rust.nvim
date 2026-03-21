@@ -10,6 +10,7 @@ permissions:
 
 jobs:
   docs:
+    if: github.repository == 'AJamesyD/blink-cmp-rust.nvim'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
