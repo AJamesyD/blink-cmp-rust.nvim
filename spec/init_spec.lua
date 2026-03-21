@@ -1,3 +1,4 @@
+--# selene: allow(global_usage)
 package.path = "./lua/?.lua;./lua/?/init.lua;" .. package.path
 
 -- Mock vim APIs before requiring the module
