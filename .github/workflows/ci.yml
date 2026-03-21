@@ -5,6 +5,10 @@ on:
     branches: [mainline]
   pull_request:
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
 jobs:
   test:
     runs-on: ubuntu-latest
@@ -24,7 +28,7 @@ jobs:
       - uses: JohnnyMorganz/stylua-action@v4
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
-          version: 0.20.0
+          version: 2.4.0
           args: --check lua/ spec/
       - uses: leafo/gh-actions-lua@v10
         with:
@@ -32,3 +36,11 @@ jobs:
       - uses: leafo/gh-actions-luarocks@v4
       - run: luarocks install luacheck
       - run: luacheck lua/ spec/
+
+  selene:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: DeterminateSystems/nix-installer-action@main
+      - uses: DeterminateSystems/magic-nix-cache-action@main
+      - run: nix develop -c selene --display-style=quiet lua/ spec/
