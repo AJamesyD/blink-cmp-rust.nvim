@@ -13,7 +13,7 @@ jobs:
     if: github.repository == 'AJamesyD/blink-cmp-rust.nvim'
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
       - run: mkdir -p doc
       - uses: kdheepak/panvimdoc@v4.0.1
         with:
