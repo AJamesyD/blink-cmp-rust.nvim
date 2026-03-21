@@ -31,12 +31,14 @@
               pkgs.luajitPackages.busted
               pkgs.luajitPackages.luacheck
               pkgs.markdownlint-cli2
+              pkgs.selene
               config.treefmt.build.wrapper
             ];
           };
 
           treefmt = {
             projectRootFile = "flake.nix";
+            programs.nixfmt.enable = true;
             programs.stylua.enable = true;
           };
         };
