@@ -12,12 +12,13 @@ jobs:
   docs:
     if: github.repository == 'AJamesyD/blink-cmp-rust.nvim'
     runs-on: ubuntu-latest
+    timeout-minutes: 10
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
       - run: mkdir -p doc
-      - uses: kdheepak/panvimdoc@v4.0.1
+      - uses: kdheepak/panvimdoc@662fb20304d20c539fb48a0bda628f5165507de7 # v4.0.1
         with:
           vimdoc: blink-cmp-rust
-      - uses: stefanzweifel/git-auto-commit-action@v4
+      - uses: stefanzweifel/git-auto-commit-action@4a55954c782fc1ea30b9056cd3e7a2b40ca8887d # v7.2.0
         with:
-          commit_message: "docs: auto-generate vimdoc"
+          commit_message: "docs: auto-generate vimdoc [skip ci]"
