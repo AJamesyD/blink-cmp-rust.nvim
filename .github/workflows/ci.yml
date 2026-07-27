@@ -66,6 +66,7 @@ jobs:
       - uses: JohnnyMorganz/stylua-action@76fd70c03e6340ceaf673366712db9b20560b402 # v5
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
+          version: 2.5.2
           args: --check lua/ spec/
       - uses: leafo/gh-actions-lua@6919171ccf181b826f44b9bca76307b577217377 # v13
         with:
